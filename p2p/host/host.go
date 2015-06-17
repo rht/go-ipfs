@@ -2,6 +2,7 @@ package host
 
 import (
 	ma "github.com/ipfs/go-ipfs/Godeps/_workspace/src/github.com/jbenet/go-multiaddr"
+	msmux "github.com/ipfs/go-ipfs/Godeps/_workspace/src/github.com/whyrusleeping/go-multistream"
 	context "github.com/ipfs/go-ipfs/Godeps/_workspace/src/golang.org/x/net/context"
 	metrics "github.com/ipfs/go-ipfs/metrics"
 	inet "github.com/ipfs/go-ipfs/p2p/net"
@@ -31,7 +32,7 @@ type Host interface {
 	Network() inet.Network
 
 	// Mux returns the Mux multiplexing incoming streams to protocol handlers
-	Mux() *protocol.Mux
+	Mux() *msmux.MultistreamMuxer
 
 	// Connect ensures there is a connection between this host and the peer with
 	// given peer.ID. Connect will absorb the addresses in pi into its internal

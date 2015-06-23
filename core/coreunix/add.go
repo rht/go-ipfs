@@ -13,9 +13,8 @@ import (
 	importer "github.com/ipfs/go-ipfs/importer"
 	chunk "github.com/ipfs/go-ipfs/importer/chunk"
 	merkledag "github.com/ipfs/go-ipfs/merkledag"
-	"github.com/ipfs/go-ipfs/pin"
-	logging "github.com/ipfs/go-ipfs/vendor/QmXJkcEXB6C9h6Ytb6rrUTFU56Ro62zxgrbxTT3dgjQGA8/go-log"
 	unixfs "github.com/ipfs/go-ipfs/unixfs"
+	logging "github.com/ipfs/go-ipfs/vendor/QmXJkcEXB6C9h6Ytb6rrUTFU56Ro62zxgrbxTT3dgjQGA8/go-log"
 )
 
 var log = logging.Logger("coreunix")
@@ -31,7 +30,6 @@ func Add(n *core.IpfsNode, r io.Reader) (string, error) {
 	dagNode, err := importer.BuildDagFromReader(
 		n.DAG,
 		chunk.NewSizeSplitter(r, chunk.DefaultBlockSize),
-		importer.BasicPinnerCB(n.Pinning),
 	)
 	if err != nil {
 		return "", err
@@ -70,11 +68,6 @@ func AddR(n *core.IpfsNode, root string) (key string, err error) {
 		return "", err
 	}
 
-	n.Pinning.RemovePinWithMode(k, pin.Indirect)
-	if err := n.Pinning.Flush(); err != nil {
-		return "", err
-	}
-
 	return k.String(), nil
 }
 
@@ -103,7 +96,6 @@ func add(n *core.IpfsNode, reader io.Reader) (*merkledag.Node, error) {
 	return importer.BuildDagFromReader(
 		n.DAG,
 		chunk.DefaultSplitter(reader),
-		importer.PinIndirectCB(n.Pinning),
 	)
 }
 

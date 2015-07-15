@@ -152,7 +152,7 @@ func initDocQuickStart() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "init-doc/quick-start", size: 1686, mode: os.FileMode(420), modTime: time.Unix(1440746324, 0)}
+	info := bindataFileInfo{name: "init-doc/quick-start", size: 1686, mode: os.FileMode(420), modTime: time.Unix(1441256262, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -212,7 +212,7 @@ func gwAssetsBootstrapMinCss() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "gw-assets/bootstrap.min.css", size: 117305, mode: os.FileMode(420), modTime: time.Unix(1440768393, 0)}
+	info := bindataFileInfo{name: "gw-assets/bootstrap.min.css", size: 117305, mode: os.FileMode(420), modTime: time.Unix(1441362652, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -232,7 +232,7 @@ func gwAssetsIconsCss() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "gw-assets/icons.css", size: 102178, mode: os.FileMode(420), modTime: time.Unix(1440768393, 0)}
+	info := bindataFileInfo{name: "gw-assets/icons.css", size: 102178, mode: os.FileMode(420), modTime: time.Unix(1441362652, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -252,7 +252,7 @@ func VendorSrcQmemzwypnhmkvgduntdnctx425gtci5dcmehlwtxbkoub8DirIndexHtmlDirIndex
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "../vendor/src/QmeMZwyPnHMkvgdUNtdNcTX425gTCi5DCMeHLwTXbKoUB8/dir-index-html/dir-index.html", size: 1600, mode: os.FileMode(420), modTime: time.Unix(1440768393, 0)}
+	info := bindataFileInfo{name: "../vendor/src/QmeMZwyPnHMkvgdUNtdNcTX425gTCi5DCMeHLwTXbKoUB8/dir-index-html/dir-index.html", size: 1600, mode: os.FileMode(420), modTime: time.Unix(1441362652, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -272,7 +272,7 @@ func VendorSrcQmemzwypnhmkvgduntdnctx425gtci5dcmehlwtxbkoub8DirIndexHtmlKnownico
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "../vendor/src/QmeMZwyPnHMkvgdUNtdNcTX425gTCi5DCMeHLwTXbKoUB8/dir-index-html/knownIcons.txt", size: 305, mode: os.FileMode(420), modTime: time.Unix(1440768393, 0)}
+	info := bindataFileInfo{name: "../vendor/src/QmeMZwyPnHMkvgdUNtdNcTX425gTCi5DCMeHLwTXbKoUB8/dir-index-html/knownIcons.txt", size: 305, mode: os.FileMode(420), modTime: time.Unix(1441362652, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }

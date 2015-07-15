@@ -15,11 +15,6 @@ test_expect_success "'ipfs repo gc' succeeds" '
 	ipfs repo gc >gc_out_actual
 '
 
-test_expect_success "'ipfs repo gc' looks good (empty)" '
-	true >empty &&
-	test_cmp empty gc_out_actual
-'
-
 test_expect_success "'ipfs add afile' succeeds" '
 	echo "some text" >afile &&
 	HASH=`ipfs add -q afile`
@@ -36,8 +31,7 @@ test_expect_success "'ipfs repo gc' succeeds" '
 
 test_expect_success "'ipfs repo gc' looks good (patch root)" '
 	PATCH_ROOT=QmQXirSbubiySKnqaFyfs5YzziXRB5JEVQVjU6xsd7innr &&
-	echo "removed $PATCH_ROOT" >patch_root &&
-	test_cmp patch_root gc_out_actual
+	grep "removed $PATCH_ROOT" gc_out_actual
 '
 
 test_expect_success "'ipfs repo gc' doesnt remove file" '
@@ -65,16 +59,6 @@ test_expect_failure "ipfs repo gc fully reverse ipfs add" '
 '
 
 test_expect_success "file no longer pinned" '
-<<<<<<< f7acf5efa93c278ab507642778592afb3b8c3076
-	# we expect the welcome files and gw assets to show up here
-	echo "$HASH_WELCOME_DOCS" >expected2 &&
-	ipfs refs -r "$HASH_WELCOME_DOCS" >>expected2 &&
-	echo "$HASH_GATEWAY_ASSETS" >>expected2 &&
-	ipfs refs -r "$HASH_GATEWAY_ASSETS" >>expected2 &&
-	EMPTY_DIR=QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn &&
-	echo "$EMPTY_DIR" >>expected2 &&
-=======
->>>>>>> implement mark and sweep GC
 	ipfs pin ls --type=recursive --quiet >actual2 &&
 	test_expect_code 1 grep $HASH actual2
 '
@@ -110,10 +94,9 @@ test_expect_success "remove direct pin" '
 '
 
 test_expect_success "'ipfs repo gc' removes file" '
-	echo "removed $HASH" >expected7 &&
-	echo "removed $PATCH_ROOT" >>expected7 &&
 	ipfs repo gc >actual7 &&
-	test_sort_cmp expected7 actual7
+	grep "removed $HASH" actual7 &&
+	grep "removed $PATCH_ROOT" actual7
 '
 
 # TODO: there seems to be a serious bug with leveldb not returning a key.
@@ -162,13 +145,7 @@ test_expect_success "'ipfs pin ls --type=recursive' is correct" '
 	echo "$MBLOCKHASH" >rp_expected &&
 	echo "$HASH_WELCOME_DOCS" >>rp_expected &&
 	echo "$HASH_GATEWAY_ASSETS" >>rp_expected &&
-<<<<<<< f7acf5efa93c278ab507642778592afb3b8c3076
-	echo "$EMPTY_DIR" >>rp_expected &&
-	ipfs refs -r "$HASH_WELCOME_DOCS" >>rp_expected &&
-	ipfs refs -r "$HASH_GATEWAY_ASSETS" >>rp_expected &&
-=======
 	echo QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn >>rp_expected &&
->>>>>>> implement mark and sweep GC
 	sed -i"~" "s/\(.*\)/\1 recursive/g" rp_expected &&
 	ipfs pin ls --type=recursive >rp_actual &&
 	test_sort_cmp rp_expected rp_actual

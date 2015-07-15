@@ -1,4 +1,5 @@
-//go:generate go-bindata -pkg=assets init-doc
+//go:generate go-bindata -pkg=assets init-doc gw-assets ../vendor/src/QmeNXKecZ7CQagtkQUJxG3yS7UcvU6puS777dQsx3amkS7/dir-index-html
+//go:generate gofmt -w bindata.go
 
 package assets
 

@@ -204,7 +204,7 @@ func TestPinRecursiveFail(t *testing.T) {
 
 	a, _ := randNode()
 	b, _ := randNode()
-	err = a.AddNodeLinkClean("child", b)
+	err := a.AddNodeLinkClean("child", b)
 	if err != nil {
 		t.Fatal(err)
 	}

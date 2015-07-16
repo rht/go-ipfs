@@ -2,6 +2,7 @@ package fsrepo
 
 import (
 	"os"
+	"time"
 
 	homedir "github.com/ipfs/go-ipfs/Godeps/_workspace/src/github.com/mitchellh/go-homedir"
 	"github.com/ipfs/go-ipfs/repo/config"
@@ -20,4 +21,19 @@ func BestKnownPath() (string, error) {
 		return "", err
 	}
 	return ipfsPath, nil
+}
+
+func Reflog(str string) error {
+	reflogFile, err := homedir.Expand(config.DefaultPathRoot + "/logs/HEAD")
+	if err != nil {
+		return err
+	}
+	f, err := os.OpenFile(reflogFile, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0600)
+	if err != nil {
+		return err
+	}
+
+	defer f.Close()
+	_, err = f.WriteString(time.Now().String() + " " + str + "\n")
+	return err
 }

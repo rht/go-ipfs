@@ -16,6 +16,7 @@ import (
 	cmds "github.com/ipfs/go-ipfs/commands"
 	core "github.com/ipfs/go-ipfs/core"
 	path "github.com/ipfs/go-ipfs/path"
+	fsrepo "github.com/ipfs/go-ipfs/repo/fsrepo"
 	tar "github.com/ipfs/go-ipfs/thirdparty/tar"
 	uio "github.com/ipfs/go-ipfs/unixfs/io"
 	utar "github.com/ipfs/go-ipfs/unixfs/tar"
@@ -169,6 +170,9 @@ func get(ctx context.Context, node *core.IpfsNode, p path.Path, compression int)
 		return nil, err
 	}
 
+	// Write to HEAD log
+	fsrepo.Reflog("get " + p.String())
+
 	return utar.NewReader(p, node.DAG, dagnode, compression)
 }
 
@@ -178,6 +182,9 @@ func getZip(ctx context.Context, node *core.IpfsNode, p path.Path, compression i
 	if err != nil {
 		return nil, err
 	}
+
+	// Write to HEAD log
+	fsrepo.Reflog("get " + p.String())
 
 	reader, err := uio.NewDagReader(ctx, dagnode, node.DAG)
 	if err != nil {

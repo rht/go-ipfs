@@ -16,6 +16,7 @@ import (
 	"github.com/ipfs/go-ipfs/importer/chunk"
 	dag "github.com/ipfs/go-ipfs/merkledag"
 	pin "github.com/ipfs/go-ipfs/pin"
+	fsrepo "github.com/ipfs/go-ipfs/repo/fsrepo"
 	ft "github.com/ipfs/go-ipfs/unixfs"
 	u "github.com/ipfs/go-ipfs/util"
 )
@@ -216,6 +217,8 @@ remains to be implemented.
 					fmt.Fprintf(res.Stdout(), "added %s %s\n", output.Hash, output.Name)
 				}
 
+				// Write to HEAD log
+				fsrepo.Reflog("add " + output.Hash)
 			} else {
 				log.Debugf("add progress: %v %v\n", output.Name, output.Bytes)
 

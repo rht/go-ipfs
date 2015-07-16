@@ -2,18 +2,17 @@ package fsrepo
 
 import (
 	"fmt"
-	"io"
 	"path"
 
 	ds "github.com/ipfs/go-ipfs/Godeps/_workspace/src/github.com/jbenet/go-datastore"
 	"github.com/ipfs/go-ipfs/Godeps/_workspace/src/github.com/jbenet/go-datastore/flatfs"
 	levelds "github.com/ipfs/go-ipfs/Godeps/_workspace/src/github.com/jbenet/go-datastore/leveldb"
 	"github.com/ipfs/go-ipfs/Godeps/_workspace/src/github.com/jbenet/go-datastore/measure"
-	"github.com/ipfs/go-ipfs/Godeps/_workspace/src/github.com/jbenet/go-datastore/mount"
+	mount "github.com/ipfs/go-ipfs/Godeps/_workspace/src/github.com/jbenet/go-datastore/syncmount"
 	ldbopts "github.com/ipfs/go-ipfs/Godeps/_workspace/src/github.com/syndtr/goleveldb/leveldb/opt"
+	repo "github.com/ipfs/go-ipfs/repo"
 	config "github.com/ipfs/go-ipfs/repo/config"
 	"github.com/ipfs/go-ipfs/thirdparty/dir"
-	ds2 "github.com/ipfs/go-ipfs/util/datastore2"
 )
 
 const (
@@ -21,15 +20,9 @@ const (
 	flatfsDirectory  = "blocks"
 )
 
-type defaultDatastore struct {
-	ds.ThreadSafeDatastore
-}
-
-func openDefaultDatastore(r *FSRepo) (Datastore, error) {
-	d := &defaultDatastore{}
-
+func openDefaultDatastore(r *FSRepo) (repo.Datastore, error) {
 	leveldbPath := path.Join(r.path, leveldbDirectory)
-	var err error
+
 	// save leveldb reference so it can be neatly closed afterward
 	leveldbDS, err := levelds.NewDatastore(leveldbPath, &levelds.Options{
 		Compression: ldbopts.NoCompression,
@@ -73,6 +66,7 @@ func openDefaultDatastore(r *FSRepo) (Datastore, error) {
 			Datastore: metricsLevelDB,
 		},
 	})
+
 	// Make sure it's ok to claim the virtual datastore from mount as
 	// threadsafe. There's no clean way to make mount itself provide
 	// this information without copy-pasting the code into two
@@ -80,9 +74,7 @@ func openDefaultDatastore(r *FSRepo) (Datastore, error) {
 	// introducing const types to Go.
 	var _ ds.ThreadSafeDatastore = blocksDS
 	var _ ds.ThreadSafeDatastore = leveldbDS
-	d.ThreadSafeDatastore = ds2.ClaimThreadSafe{mountDS}
-
-	return d, nil
+	return mountDS, nil
 }
 
 func initDefaultDatastore(repoPath string, conf *config.Config) error {
@@ -98,10 +90,4 @@ func initDefaultDatastore(repoPath string, conf *config.Config) error {
 		return fmt.Errorf("datastore: %s", err)
 	}
 	return nil
-}
-
-var _ Datastore = (*defaultDatastore)(nil)
-
-func (d *defaultDatastore) Close() error {
-	return d.ThreadSafeDatastore.(io.Closer).Close()
 }

@@ -34,14 +34,12 @@ it contains.
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		node, err := req.InvocContext().GetNode()
-		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if res.SetErr(err) {
 			return
 		}
 
 		readers, length, err := cat(req.Context(), node, req.Arguments())
-		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if res.SetErr(err) {
 			return
 		}
 

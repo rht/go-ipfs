@@ -49,19 +49,17 @@ var initCmd = &cmds.Command{
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		if req.InvocContext().Online {
-			res.SetError(errors.New("init must be run offline only!"), cmds.ErrNormal)
+			res.SetErr(errors.New("init must be run offline only!"))
 			return
 		}
 
 		force, _, err := req.Option("f").Bool() // if !found, it's okay force == false
-		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if res.SetErr(err) {
 			return
 		}
 
 		nBitsForKeypair, bitsOptFound, err := req.Option("b").Int()
-		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if res.SetErr(err) {
 			return
 		}
 
@@ -69,8 +67,7 @@ var initCmd = &cmds.Command{
 			nBitsForKeypair = nBitsForKeypairDefault
 		}
 
-		if err := doInit(os.Stdout, req.InvocContext().ConfigRoot, force, nBitsForKeypair); err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if err := doInit(os.Stdout, req.InvocContext().ConfigRoot, force, nBitsForKeypair); res.SetErr(err) {
 			return
 		}
 	},

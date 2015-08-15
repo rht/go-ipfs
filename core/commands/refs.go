@@ -56,40 +56,42 @@ Note: list all refs recursively with -r.
 		cmds.BoolOption("recursive", "r", "Recursively list links of child nodes"),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
+		setErr := func(err error) bool {
+			if err != nil {
+				res.SetError(err, cmds.ErrNormal)
+				return true
+			}
+			return false
+		}
+
 		ctx := req.Context()
 		n, err := req.InvocContext().GetNode()
-		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if setErr(err) {
 			return
 		}
 
 		unique, _, err := req.Option("unique").Bool()
-		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if setErr(err) {
 			return
 		}
 
 		recursive, _, err := req.Option("recursive").Bool()
-		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if setErr(err) {
 			return
 		}
 
 		edges, _, err := req.Option("edges").Bool()
-		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if setErr(err) {
 			return
 		}
 
 		format, _, err := req.Option("format").String()
-		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if setErr(err) {
 			return
 		}
 
 		objs, err := objectsForPaths(ctx, n, req.Arguments())
-		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if setErr(err) {
 			return
 		}
 

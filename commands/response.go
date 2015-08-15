@@ -91,6 +91,7 @@ type Response interface {
 
 	// Set/Return the response Error
 	SetError(err error, code ErrorType)
+	SetErr(err error) bool
 	Error() *Error
 
 	// Sets/Returns the response value
@@ -154,6 +155,15 @@ func (r *response) Error() *Error {
 
 func (r *response) SetError(err error, code ErrorType) {
 	r.err = &Error{Message: err.Error(), Code: code}
+}
+
+// very commonly used pattern
+func (r *response) SetErr(err error) bool {
+	if err != nil {
+		r.SetError(err, ErrNormal)
+		return true
+	}
+	return false
 }
 
 func (r *response) Marshal() (io.Reader, error) {

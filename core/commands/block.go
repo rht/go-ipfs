@@ -114,27 +114,30 @@ It reads from stdin, and <key> is a base58 encoded multihash.
 		cmds.FileArg("data", true, false, "The data to be stored as an IPFS block").EnableStdin(),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
+		setErr := func(err error) bool {
+			if err != nil {
+				res.SetError(err, cmds.ErrNormal)
+				return true
+			}
+			return false
+		}
 		n, err := req.InvocContext().GetNode()
-		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if setErr(err) {
 			return
 		}
 
 		file, err := req.Files().NextFile()
-		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if setErr(err) {
 			return
 		}
 
 		data, err := ioutil.ReadAll(file)
-		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if setErr(err) {
 			return
 		}
 
 		err = file.Close()
-		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if setErr(err) {
 			return
 		}
 
@@ -142,8 +145,7 @@ It reads from stdin, and <key> is a base58 encoded multihash.
 		log.Debugf("BlockPut key: '%q'", b.Key())
 
 		k, err := n.Blocks.AddBlock(b)
-		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if setErr(err) {
 			return
 		}
 

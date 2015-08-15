@@ -61,30 +61,26 @@ in the bootstrap list).
 
 	Run: func(req cmds.Request, res cmds.Response) {
 		inputPeers, err := config.ParseBootstrapPeers(req.Arguments())
-		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if res.SetErr(err) {
 			return
 		}
 
 		r, err := fsrepo.Open(req.InvocContext().ConfigRoot)
-		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if res.SetErr(err) {
 			return
 		}
 		defer r.Close()
 		cfg := r.Config()
 
 		deflt, _, err := req.Option("default").Bool()
-		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if res.SetErr(err) {
 			return
 		}
 
 		if deflt {
 			// parse separately for meaningful, correct error.
 			defltPeers, err := config.DefaultBootstrapPeers()
-			if err != nil {
-				res.SetError(err, cmds.ErrNormal)
+			if res.SetErr(err) {
 				return
 			}
 
@@ -92,13 +88,12 @@ in the bootstrap list).
 		}
 
 		if len(inputPeers) == 0 {
-			res.SetError(errors.New("no bootstrap peers to add"), cmds.ErrClient)
+			res.SetErr(errors.New("no bootstrap peers to add"))
 			return
 		}
 
 		added, err := bootstrapAdd(r, cfg, inputPeers)
-		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if res.SetErr(err) {
 			return
 		}
 

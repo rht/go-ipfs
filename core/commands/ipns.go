@@ -46,17 +46,13 @@ Resolve the value of another name:
 		cmds.BoolOption("recursive", "r", "Resolve until the result is not an IPNS name"),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
-
 		n, err := req.InvocContext().GetNode()
-		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if res.SetErr(err) {
 			return
 		}
 
 		if !n.OnlineMode() {
-			err := n.SetupOfflineRouting()
-			if err != nil {
-				res.SetError(err, cmds.ErrNormal)
+			if err := n.SetupOfflineRouting(); res.SetErr(err) {
 				return
 			}
 		}
@@ -65,7 +61,7 @@ Resolve the value of another name:
 
 		if len(req.Arguments()) == 0 {
 			if n.Identity == "" {
-				res.SetError(errors.New("Identity not loaded!"), cmds.ErrNormal)
+				res.SetErr(errors.New("Identity not loaded!"))
 				return
 			}
 			name = n.Identity.Pretty()
@@ -82,8 +78,7 @@ Resolve the value of another name:
 
 		resolver := namesys.NewRoutingResolver(n.Routing)
 		output, err := resolver.ResolveN(req.Context(), name, depth)
-		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if res.SetErr(err) {
 			return
 		}
 

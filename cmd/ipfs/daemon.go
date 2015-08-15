@@ -158,8 +158,7 @@ func daemonFunc(req cmds.Request, res cmds.Response) {
 	// first, whether user has provided the initialization flag. we may be
 	// running in an uninitialized state.
 	initialize, _, err := req.Option(initOptionKwd).Bool()
-	if err != nil {
-		res.SetError(err, cmds.ErrNormal)
+	if res.SetErr(err) {
 		return
 	}
 
@@ -170,9 +169,7 @@ func daemonFunc(req cmds.Request, res cmds.Response) {
 		// `IsInitialized` where the quality of the signal can be improved over
 		// time, and many call-sites can benefit.
 		if !util.FileExists(req.InvocContext().ConfigRoot) {
-			err := initWithDefaults(os.Stdout, req.InvocContext().ConfigRoot)
-			if err != nil {
-				res.SetError(err, cmds.ErrNormal)
+			if err := initWithDefaults(os.Stdout, req.InvocContext().ConfigRoot); res.SetErr(err) {
 				return
 			}
 		}
@@ -181,14 +178,12 @@ func daemonFunc(req cmds.Request, res cmds.Response) {
 	// acquire the repo lock _before_ constructing a node. we need to make
 	// sure we are permitted to access the resources (datastore, etc.)
 	repo, err := fsrepo.Open(req.InvocContext().ConfigRoot)
-	if err != nil {
-		res.SetError(err, cmds.ErrNormal)
+	if res.SetErr(err) {
 		return
 	}
 
 	cfg, err := ctx.GetConfig()
-	if err != nil {
-		res.SetError(err, cmds.ErrNormal)
+	if res.SetErr(err) {
 		return
 	}
 
@@ -197,14 +192,12 @@ func daemonFunc(req cmds.Request, res cmds.Response) {
 	nb.SetRepo(repo)
 
 	routingOption, _, err := req.Option(routingOptionKwd).String()
-	if err != nil {
-		res.SetError(err, cmds.ErrNormal)
+	if res.SetErr(err) {
 		return
 	}
 	if routingOption == routingOptionSupernodeKwd {
 		servers, err := repo.Config().SupernodeRouting.ServerIPFSAddrs()
-		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if res.SetErr(err) {
 			repo.Close() // because ownership hasn't been transferred to the node
 			return
 		}
@@ -219,9 +212,8 @@ func daemonFunc(req cmds.Request, res cmds.Response) {
 	}
 
 	node, err := nb.Build(req.Context())
-	if err != nil {
+	if res.SetErr(err) {
 		log.Error("error from node construction: ", err)
-		res.SetError(err, cmds.ErrNormal)
 		return
 	}
 
@@ -245,8 +237,7 @@ func daemonFunc(req cmds.Request, res cmds.Response) {
 
 	// construct api endpoint - every time
 	err, apiErrc := serveHTTPApi(req)
-	if err != nil {
-		res.SetError(err, cmds.ErrNormal)
+	if res.SetErr(err) {
 		return
 	}
 
@@ -255,21 +246,18 @@ func daemonFunc(req cmds.Request, res cmds.Response) {
 	if len(cfg.Addresses.Gateway) > 0 {
 		var err error
 		err, gwErrc = serveHTTPGateway(req)
-		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if res.SetErr(err) {
 			return
 		}
 	}
 
 	// construct fuse mountpoints - if the user provided the --mount flag
 	mount, _, err := req.Option(mountKwd).Bool()
-	if err != nil {
-		res.SetError(err, cmds.ErrNormal)
+	if res.SetErr(err) {
 		return
 	}
 	if mount {
-		if err := mountFuse(req); err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if err := mountFuse(req); res.SetErr(err) {
 			return
 		}
 	}
@@ -277,8 +265,7 @@ func daemonFunc(req cmds.Request, res cmds.Response) {
 	// collect long-running errors and block for shutdown
 	// TODO(cryptix): our fuse currently doesnt follow this pattern for graceful shutdown
 	for err := range merge(apiErrc, gwErrc) {
-		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+		if res.SetErr(err) {
 			return
 		}
 	}

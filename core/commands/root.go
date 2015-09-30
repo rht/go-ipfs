@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	cmds "github.com/ipfs/go-ipfs/commands"
+	files "github.com/ipfs/go-ipfs/core/commands/files"
 	unixfs "github.com/ipfs/go-ipfs/core/commands/unixfs"
 	logging "github.com/ipfs/go-ipfs/vendor/QmXJkcEXB6C9h6Ytb6rrUTFU56Ro62zxgrbxTT3dgjQGA8/go-log"
 )
@@ -94,6 +95,7 @@ var rootSubcommands = map[string]*cmds.Command{
 	"dht":       DhtCmd,
 	"diag":      DiagCmd,
 	"dns":       DNSCmd,
+	"files":     files.FilesCmd,
 	"get":       GetCmd,
 	"id":        IDCmd,
 	"log":       LogCmd,

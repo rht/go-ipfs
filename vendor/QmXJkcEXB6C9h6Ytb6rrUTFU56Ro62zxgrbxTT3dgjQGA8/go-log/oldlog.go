@@ -68,7 +68,7 @@ func SetDebugLogging() {
 func SetAllLoggers(lvl logrus.Level) {
 	log.Level = lvl
 	for _, logger := range loggers {
-		logger.Level = lvl
+		logger.LogLevel = lvl
 	}
 }
 
@@ -91,7 +91,7 @@ func SetLogLevel(name, level string) error {
 		return ErrNoSuchLogger
 	}
 
-	loggers[name].Level = lvl
+	loggers[name].LogLevel = lvl
 
 	return nil
 }

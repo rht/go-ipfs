@@ -154,9 +154,8 @@ func (bs *Bitswap) GetBlock(parent context.Context, k key.Key) (*blocks.Block, e
 
 	ctx = logging.ContextWithLoggable(ctx, logging.Uuid("GetBlockRequest"))
 	log.Event(ctx, "Bitswap.GetBlockRequest.Start", &k)
-	defer log.Event(ctx, "Bitswap.GetBlockRequest.End", &k)
-
 	defer func() {
+		log.Event(ctx, "Bitswap.GetBlockRequest.End", &k)
 		cancelFunc()
 	}()
 

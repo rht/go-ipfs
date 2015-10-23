@@ -68,6 +68,7 @@ ipfs object patch <args>    - Create new object from old ones
 		"stat":  objectStatCmd,
 		"new":   objectNewCmd,
 		"patch": objectPatchCmd,
+		"cache": objectCacheCmd,
 	},
 }
 
@@ -226,6 +227,39 @@ This command outputs data in the following encodings:
 			}
 			return bytes.NewReader(marshaled), nil
 		},
+	},
+}
+
+var objectCacheCmd = &cmds.Command{
+	Helptext: cmds.HelpText{
+		Tagline: "Cache the DAG node named by <key> into datastore",
+		ShortDescription: `
+'ipfs object cache' is a plumbing command for retreiving DAG nodes.
+Like 'ipfs object get' but without copying into the output.
+`,
+	},
+
+	Arguments: []cmds.Argument{
+		cmds.StringArg("key", true, false, "Key of the object to retrieve (in base58-encoded multihash format)").EnableStdin(),
+	},
+	Run: func(req cmds.Request, res cmds.Response) {
+		n, err := req.InvocContext().GetNode()
+		if err != nil {
+			res.SetError(err, cmds.ErrNormal)
+			return
+		}
+
+		fpath := path.Path(req.Arguments()[0])
+
+		//object, err := core.Resolve(req.Context(), n, fpath)
+		_, err = core.Resolve(req.Context(), n, fpath)
+		if err != nil {
+			res.SetError(err, cmds.ErrNormal)
+			return
+		}
+
+		// TODO: better way to drain the data?
+		//io.Copy(ioutil.Discard, bytes.NewBuffer(object.Data))
 	},
 }
 

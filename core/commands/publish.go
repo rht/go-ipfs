@@ -8,12 +8,15 @@ import (
 	"time"
 
 	context "github.com/ipfs/go-ipfs/Godeps/_workspace/src/golang.org/x/net/context"
+	"github.com/ipfs/go-ipfs/namesys"
+	kb "github.com/ipfs/go-ipfs/routing/kbucket"
 
 	key "github.com/ipfs/go-ipfs/blocks/key"
 	cmds "github.com/ipfs/go-ipfs/commands"
 	core "github.com/ipfs/go-ipfs/core"
 	crypto "github.com/ipfs/go-ipfs/p2p/crypto"
 	path "github.com/ipfs/go-ipfs/path"
+	offroute "github.com/ipfs/go-ipfs/routing/offline"
 )
 
 var errNotOnline = errors.New("This command must be run in online mode. Try running 'ipfs daemon' first.")
@@ -62,6 +65,7 @@ Publish an <ipfs-path> to another public key (not implemented):
 			return
 		}
 
+		local, _, _ := req.Option("local").Bool()
 		if !n.OnlineMode() {
 			err := n.SetupOfflineRouting()
 			if err != nil {
@@ -108,9 +112,14 @@ Publish an <ipfs-path> to another public key (not implemented):
 			ctx = context.WithValue(ctx, "ipns-publish-ttl", d)
 		}
 
-		output, err := publish(ctx, n, n.PrivateKey, path.Path(pstr), popts)
+		output, err := publish(ctx, n, n.PrivateKey, path.Path(pstr), popts, local)
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			switch err {
+			case kb.ErrLookupFailure:
+				res.SetError(errors.New("Please use 'ipfs name publish --local' instead"), cmds.ErrClient)
+			default:
+				res.SetError(err, cmds.ErrNormal)
+			}
 			return
 		}
 		res.SetOutput(output)
@@ -130,7 +139,7 @@ type publishOpts struct {
 	pubValidTime time.Duration
 }
 
-func publish(ctx context.Context, n *core.IpfsNode, k crypto.PrivKey, ref path.Path, opts *publishOpts) (*IpnsEntry, error) {
+func publish(ctx context.Context, n *core.IpfsNode, k crypto.PrivKey, ref path.Path, opts *publishOpts, local bool) (*IpnsEntry, error) {
 
 	if opts.verifyExists {
 		// verify the path exists
@@ -140,8 +149,18 @@ func publish(ctx context.Context, n *core.IpfsNode, k crypto.PrivKey, ref path.P
 		}
 	}
 
-	eol := time.Now().Add(opts.pubValidTime)
-	err := n.Namesys.PublishWithEOL(ctx, k, ref, eol)
+	var err error
+	if n.OnlineMode() && local {
+		r := offroute.NewOfflineRouter(n.Repo.Datastore(), n.PrivateKey)
+		rp := namesys.NewRoutingPublisher(r, n.Repo.Datastore())
+
+		eol := time.Now().Add(opts.pubValidTime)
+		err = rp.PublishWithEOL(ctx, k, ref, eol)
+	} else {
+		eol := time.Now().Add(opts.pubValidTime)
+		err = n.Namesys.PublishWithEOL(ctx, k, ref, eol)
+	}
+
 	if err != nil {
 		return nil, err
 	}

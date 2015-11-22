@@ -321,6 +321,13 @@ func callCommand(ctx context.Context, req cmds.Request, root *cmds.Command, cmd 
 		}
 	}
 
+	go func() {
+		select {
+		case <-ctx.Done():
+			fmt.Fprintf(os.Stderr, "ffff")
+		}
+	}()
+
 	if client != nil {
 		log.Debug("Executing command via API")
 		res, err = client.Send(req)

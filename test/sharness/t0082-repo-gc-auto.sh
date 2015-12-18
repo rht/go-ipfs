@@ -39,7 +39,7 @@ test_gc() {
     test_expect_success "adding data beyond watermark triggers auto gc" '
         HASH=`ipfs add -q 600k2` &&
         ipfs pin rm -r $HASH &&
-        go-sleep 40ms &&
+        go-sleep 50ms &&
         DU=$(disk_usage "$IPFS_PATH/blocks") &&
         if test $(uname -s) = "Darwin"; then
             test "$DU" -lt 1400  # 60% of 2MB

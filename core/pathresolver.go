@@ -2,9 +2,12 @@ package core
 
 import (
 	"errors"
+	"net/http"
 	"strings"
 
 	context "github.com/ipfs/go-ipfs/Godeps/_workspace/src/golang.org/x/net/context"
+	"github.com/ipfs/go-ipfs/importer"
+	"github.com/ipfs/go-ipfs/importer/chunk"
 
 	merkledag "github.com/ipfs/go-ipfs/merkledag"
 	path "github.com/ipfs/go-ipfs/path"
@@ -50,6 +53,17 @@ func Resolve(ctx context.Context, n *IpfsNode, p path.Path) (*merkledag.Node, er
 		if err != nil {
 			return nil, err
 		}
+	} else if strings.HasPrefix(p.String(), "/http/") || strings.HasPrefix(p.String(), "/https/") {
+		// resolve https paths
+		url := p.String()[1:] // string the first '/'
+		url = strings.Replace(url, "/", "://", 1)
+		// TODO: wire ctx
+		resp, err := http.Get(url)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+		return importer.BuildDagFromReader(n.DAG, chunk.DefaultSplitter(resp.Body))
 	}
 
 	// ok, we have an ipfs path now (or what we'll treat as one)
